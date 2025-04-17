@@ -1,0 +1,33 @@
+[package]
+name = "open_the_door"
+version = "0.1.0"
+authors = ["hs"]
+edition = "2021"
+resolver = "2"
+rust-version = "1.77"
+
+[[bin]]
+name = "open_the_door"
+harness = false # do not use the built in cargo test harness -> resolve rust-analyzer errors
+
+[profile.release]
+opt-level = "s"
+
+[profile.dev]
+debug = true    # Symbols are nice and they don't increase the size on Flash
+opt-level = "z"
+
+[features]
+default = []
+
+experimental = ["esp-idf-svc/experimental"]
+
+[dependencies]
+esp-idf-svc = { version = "0.51", features = ["critical-section", "embassy-time-driver", "embassy-sync"] }
+esp32-nimble = "0.11.1"
+bstr = "1.12.0"
+log = "0.4.27"
+anyhow = "1.0.98"
+
+[build-dependencies]
+embuild = "0.33"
