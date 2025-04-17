@@ -1,5 +1,5 @@
 [package]
-name = "open_the_door"
+name = "remote_servo_controllor"
 version = "0.1.0"
 authors = ["hs"]
 edition = "2021"
@@ -7,7 +7,7 @@ resolver = "2"
 rust-version = "1.77"
 
 [[bin]]
-name = "open_the_door"
+name = "remote_servo_controllor"
 harness = false # do not use the built in cargo test harness -> resolve rust-analyzer errors
 
 [profile.release]

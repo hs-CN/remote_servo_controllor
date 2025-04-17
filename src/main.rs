@@ -45,6 +45,9 @@ fn init_ble(sender: SyncSender<Vec<u8>>) -> Result<(), esp32_nimble::BLEError> {
             .name("BLE Lock")
             .add_service_uuid(BLE_SERVICE_UUID),
     )?;
+    ble_advertising.lock().min_interval(1280); // 800ms
+    ble_advertising.lock().max_interval(1600); // 1000ms
+    ble_advertising.lock().scan_response(false);
     ble_advertising.lock().start()
 }
 
