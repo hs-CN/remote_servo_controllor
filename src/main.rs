@@ -83,8 +83,11 @@ impl<'a> SG90<'a> {
     fn set_degree(&mut self, degree: u8) -> Result<(), esp_idf_svc::sys::EspError> {
         let duty = (degree as f32 / 1800.0) + 0.025;
         let duty = duty * self.max_duty as f32;
-        self.ledc.set_duty(duty as u32)?;
-        Ok(())
+        self.ledc.set_duty(duty as u32)
+    }
+
+    fn disable(&mut self) -> Result<(), esp_idf_svc::sys::EspError> {
+        self.ledc.disable()
     }
 }
 
@@ -100,14 +103,15 @@ fn main() -> anyhow::Result<()> {
     init_ble(sender)?;
 
     let peripherals = Peripherals::take()?;
-    let mut st90 = SG90::new(
+    let mut sg90 = SG90::new(
         peripherals.ledc.channel0,
         peripherals.ledc.timer0,
         peripherals.pins.gpio9,
     )?;
 
-    st90.set_degree(0)?;
+    sg90.set_degree(0)?;
     delay::FreeRtos::delay_ms(1000);
+    sg90.disable()?;
 
     loop {
         let data = receiver.recv()?;
@@ -118,11 +122,13 @@ fn main() -> anyhow::Result<()> {
             }
             info!("Set degree: {}", degree);
 
-            st90.set_degree(degree)?;
+            sg90.set_degree(degree)?;
             delay::FreeRtos::delay_ms(1000);
 
-            st90.set_degree(0)?;
+            sg90.set_degree(0)?;
             delay::FreeRtos::delay_ms(1000);
+
+            sg90.disable()?;
         } else {
             warn!("Invalid command: {}", data.as_bstr());
         }
