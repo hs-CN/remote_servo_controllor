@@ -123,7 +123,7 @@ fn main() -> anyhow::Result<()> {
             info!("Set degree: {}", degree);
 
             sg90.set_degree(degree)?;
-            delay::FreeRtos::delay_ms(1000);
+            delay::FreeRtos::delay_ms(700);
 
             sg90.set_degree(0)?;
             delay::FreeRtos::delay_ms(1000);
