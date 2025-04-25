@@ -1,6 +1,8 @@
 use bstr::ByteSlice;
 use esp32_nimble::{
-    utilities::BleUuid, uuid128, BLEAdvertisementData, BLEDevice, NimbleProperties,
+    enums::{PowerLevel, PowerType},
+    utilities::BleUuid,
+    uuid128, BLEAdvertisementData, BLEDevice, NimbleProperties,
 };
 use esp_idf_svc::hal::{
     delay, gpio, ledc, peripheral::Peripheral, peripherals::Peripherals, units::Hertz,
@@ -14,6 +16,7 @@ fn init_ble(sender: SyncSender<Vec<u8>>) -> Result<(), esp32_nimble::BLEError> {
     static BLE_CMD_UUID: BleUuid = uuid128!("047c2b6b-97b5-4b0c-adba-bbea3f7fb2e2");
 
     let ble_device = BLEDevice::take();
+    ble_device.set_power(PowerType::Advertising, PowerLevel::P9)?;
     let ble_server = ble_device.get_server(); // not need start manually
     let ble_advertising = ble_device.get_advertising();
 
@@ -21,6 +24,7 @@ fn init_ble(sender: SyncSender<Vec<u8>>) -> Result<(), esp32_nimble::BLEError> {
     ble_server.advertise_on_disconnect(true);
     ble_server.on_connect(|server, desc| {
         info!("Connected to device: {}", desc.address());
+        let _ = ble_device.set_power(PowerType::ConnHdl0, PowerLevel::P9);
         let _ = server.update_conn_params(desc.conn_handle(), 24, 48, 0, 60);
     });
     ble_server.on_disconnect(|desc, _| info!("Disconnected from device: {}", desc.address()));
@@ -123,7 +127,7 @@ fn main() -> anyhow::Result<()> {
             info!("Set degree: {}", degree);
 
             sg90.set_degree(degree)?;
-            delay::FreeRtos::delay_ms(700);
+            delay::FreeRtos::delay_ms(1000);
 
             sg90.set_degree(0)?;
             delay::FreeRtos::delay_ms(1000);
